@@ -1,10 +1,12 @@
 # meter-vision
 
+<div align="right">
+  <a href="README.zh-CN.md">中文</a> | <strong>English</strong>
+</div>
+
 **Pointer gauge reader powered by YOLO pose estimation.**
 
 Automatically reads analog pointer gauges (pressure gauges, voltmeters, ammeters, etc.) from images or live video streams using keypoint detection.
-
-> **基于 YOLO 姿态估计的指针仪表自动读数系统**，支持图片上传与实时视频流。
 
 ---
 
@@ -12,7 +14,7 @@ Automatically reads analog pointer gauges (pressure gauges, voltmeters, ammeters
 
 | Upload an image | Live stream with reading |
 |---|---|
-| Upload → detect keypoints → get scale value | Connect camera / RTSP → overlaid real-time reading |
+| Drag & drop → detect keypoints → get scale value | Connect camera / RTSP → overlaid real-time reading |
 
 ---
 
@@ -24,7 +26,7 @@ Automatically reads analog pointer gauges (pressure gauges, voltmeters, ammeters
    - `kp_id 3–9` — dial scale marks (mapped to values 0.0 → 6.0)
 
 2. **Perspective-robust algorithm** (`gauge_reader.py`):
-   - Uses `kp_id 0` directly as the angular origin (avoids circle-fitting failure under perspective distortion)
+   - Uses `kp_id 0` directly as the angular origin — avoids circle-fitting failure under perspective distortion
    - Computes pointer direction via confidence-weighted average of `kp_id 1/2`
    - Maps pointer angle onto scale via piecewise linear interpolation
    - Returns reading value + out-of-range flag
@@ -36,8 +38,8 @@ Automatically reads analog pointer gauges (pressure gauges, voltmeters, ammeters
 
 4. **Web UI** (`frontend/index.html`) — zero-dependency single-page app:
    - Image upload with drag & drop
-   - Canvas overlay showing keypoints, scale rays, pointer arrow, and reading
-   - Video stream tab supporting local camera index or RTSP URL
+   - Canvas overlay: keypoints, scale rays, pointer arrow, reading value
+   - Video stream tab: local camera index or RTSP URL
 
 ---
 
@@ -71,7 +73,7 @@ docker-compose up --build
 ```
 
 - Web UI: http://localhost:8080
-- API:    http://localhost:9090/docs
+- API docs: http://localhost:9090/docs
 
 ### Option 2 — Run directly
 
@@ -83,14 +85,12 @@ uvicorn main:app --host 0.0.0.0 --port 9090
 ```
 
 **Frontend:**
-
-Open `frontend/index.html` directly in your browser, or serve with any static server:
 ```bash
-# Python built-in
+# Serve with Python built-in HTTP server
 python -m http.server 8080 --directory frontend
 ```
 
-Then open http://localhost:8080 and set the API server address to `http://<backend-ip>:9090`.
+Open http://localhost:8080, set the API address to `http://<backend-ip>:9090`.
 
 ---
 
@@ -98,9 +98,9 @@ Then open http://localhost:8080 and set the API server address to `http://<backe
 
 ### `POST /detect`
 
-Upload an image file, returns keypoints and gauge reading.
+Upload an image, returns keypoints and gauge reading.
 
-**Request:** `multipart/form-data` with field `file`
+**Request:** `multipart/form-data`, field name `file`
 
 **Response:**
 ```json
@@ -110,7 +110,7 @@ Upload an image file, returns keypoints and gauge reading.
       "person_id": 0,
       "keypoints": [
         {"kp_id": 0, "x": 613.2, "y": 976.8, "conf": 0.984},
-        ...
+        "..."
       ],
       "box": [483.6, 782.9, 1186.1, 972.5]
     }
@@ -121,7 +121,7 @@ Upload an image file, returns keypoints and gauge reading.
     "confidence": 0.9872,
     "pointer_angle_deg": -12.3,
     "pivot": [613.2, 976.8],
-    "scale_points": [[1195.5, 863.8], ...]
+    "scale_points": [[1195.5, 863.8], "..."]
   }
 }
 ```
@@ -130,9 +130,9 @@ Upload an image file, returns keypoints and gauge reading.
 
 Returns an MJPEG stream with readings overlaid.
 
-| `source` value | Meaning |
+| `source` | Meaning |
 |---|---|
-| `0`, `1`, `2` | Local camera index |
+| `0`, `1` | Local camera index |
 | `rtsp://192.168.1.100:554/stream` | RTSP IP camera |
 
 ### `GET /video_stop`
@@ -141,28 +141,22 @@ Stops the active MJPEG stream.
 
 ---
 
-## Keypoint Label Convention
+## Keypoint Convention
 
 | kp_id | Role | Scale value |
 |---|---|---|
 | 0 | Pointer base / rotation pivot | — |
-| 1 | Pointer mid point | — |
+| 1 | Pointer mid | — |
 | 2 | Pointer tip | — |
-| 3 | Scale mark | 0.0 |
-| 4 | Scale mark | 1.0 |
-| 5 | Scale mark | 2.0 |
-| 6 | Scale mark | 3.0 |
-| 7 | Scale mark | 4.0 |
-| 8 | Scale mark | 5.0 |
-| 9 | Scale mark | 6.0 |
+| 3–9 | Scale marks | 0.0 → 6.0 |
 
-To adapt to a different scale range, edit `SCALE_MAP` in `backend/gauge_reader.py`.
+To adapt to a different range, edit `SCALE_MAP` in `backend/gauge_reader.py`.
 
 ---
 
 ## Training Your Own Model
 
-This project uses [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) with a custom keypoint configuration.
+Uses [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) with a custom keypoint config.
 
 1. Annotate images in COCO keypoint format (10 keypoints per gauge, order as above)
 2. Train:
@@ -177,7 +171,7 @@ This project uses [Ultralytics YOLO](https://github.com/ultralytics/ultralytics)
 
 - Python 3.10+
 - PyTorch (CPU or CUDA)
-- See `backend/requirements.txt` for full list
+- See `backend/requirements.txt`
 
 ---
 
