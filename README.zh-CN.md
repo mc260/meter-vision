@@ -1,10 +1,6 @@
 # meter-vision
 
 <div align="right">
-  <a href="README.zh-CN.md">中文</a> | <strong>English</strong>
-</div>
-
-<div align="right">
   <strong>中文</strong> | <a href="README.md">English</a>
 </div>
 
@@ -106,7 +102,6 @@ python -m http.server 8080 --directory frontend
       "keypoints": [
         {"kp_id": 0, "x": 613.2, "y": 976.8, "conf": 0.984},
         "..."
-        "..."
       ],
       "box": [483.6, 782.9, 1186.1, 972.5]
     }
@@ -117,7 +112,6 @@ python -m http.server 8080 --directory frontend
     "confidence": 0.9872,
     "pointer_angle_deg": -12.3,
     "pivot": [613.2, 976.8],
-    "scale_points": [[1195.5, 863.8], "..."]
     "scale_points": [[1195.5, 863.8], "..."]
   }
 }

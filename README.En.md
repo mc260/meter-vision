@@ -1,7 +1,7 @@
 # meter-vision
 
 <div align="right">
-  <a href="README.zh-CN.md">中文</a> | <strong>English</strong>
+  <a href="README.md">中文</a> | <strong>English</strong>
 </div>
 
 **Pointer gauge reader powered by YOLO pose estimation.**
