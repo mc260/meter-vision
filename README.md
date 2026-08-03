@@ -1,68 +1,61 @@
 # meter-vision
 
-**Pointer gauge reader powered by YOLO pose estimation.**
+<div align="right">
+  <strong>中文</strong> | <a href="README.md">English</a>
+</div>
 
-Automatically reads analog pointer gauges (pressure gauges, voltmeters, ammeters, etc.) from images or live video streams using keypoint detection.
+**基于 YOLO 姿态估计的指针仪表自动读数系统。**
 
-> **基于 YOLO 姿态估计的指针仪表自动读数系统**，支持图片上传与实时视频流。
-
----
-
-## Demo
-
-| Upload an image | Live stream with reading |
-|---|---|
-| Upload → detect keypoints → get scale value | Connect camera / RTSP → overlaid real-time reading |
+从图片或实时视频流中自动识别模拟指针仪表（压力表、电压表、电流表等）的读数。
 
 ---
 
-## How It Works
+## 工作原理
 
-1. **YOLO Pose model** detects 10 keypoints on the gauge:
-   - `kp_id 0` — pointer base (rotation pivot)
-   - `kp_id 1–2` — points along the pointer arm
-   - `kp_id 3–9` — dial scale marks (mapped to values 0.0 → 6.0)
+1. **YOLO Pose 模型**在仪表上检测 10 个关键点：
+   - `kp_id 0` — 指针底部（旋转轴）
+   - `kp_id 1–2` — 指针上的点，由底部向末端延伸
+   - `kp_id 3–9` — 表盘刻度点，固定对应刻度值 0.0 → 6.0
 
-2. **Perspective-robust algorithm** (`gauge_reader.py`):
-   - Uses `kp_id 0` directly as the angular origin (avoids circle-fitting failure under perspective distortion)
-   - Computes pointer direction via confidence-weighted average of `kp_id 1/2`
-   - Maps pointer angle onto scale via piecewise linear interpolation
-   - Returns reading value + out-of-range flag
+2. **透视鲁棒读数算法**（`gauge_reader.py`）：
+   - 直接以 `kp_id 0` 为角度原点，避免透视形变下圆拟合圆心偏移的问题
+   - 对 `kp_id 1/2` 按置信度加权平均，得到指针方向向量
+   - 对刻度角度序列做分段线性插值，计算最终读数
+   - 返回读数值及越量程标记
 
-3. **FastAPI backend** exposes:
-   - `POST /detect` — single image inference
-   - `GET /video_feed?source=<cam>` — MJPEG stream with overlaid readings
-   - `GET /video_stop` — stop active stream
+3. **FastAPI 后端**提供以下接口：
+   - `POST /detect` — 单张图片推理
+   - `GET /video_feed?source=<来源>` — 叠加读数的 MJPEG 视频流
+   - `GET /video_stop` — 停止当前视频流
 
-4. **Web UI** (`frontend/index.html`) — zero-dependency single-page app:
-   - Image upload with drag & drop
-   - Canvas overlay showing keypoints, scale rays, pointer arrow, and reading
-   - Video stream tab supporting local camera index or RTSP URL
+4. **Web 前端**（`frontend/index.html`）— 零依赖单文件页面：
+   - 拖拽上传图片，Canvas 叠加显示关键点、刻度射线、指针箭头和读数
+   - 视频流标签页，支持本地摄像头编号或 RTSP 地址
 
 ---
 
-## Project Structure
+## 项目结构
 
 ```
 meter-vision/
 ├── backend/
-│   ├── main.py            # FastAPI server (detect + MJPEG stream)
-│   ├── gauge_reader.py    # Core reading algorithm
+│   ├── main.py            # FastAPI 服务（检测 + MJPEG 流）
+│   ├── gauge_reader.py    # 核心读数算法
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
-│   └── index.html         # Single-file web UI (no build step)
+│   └── index.html         # 单文件 Web UI，无需构建
 ├── models/
-│   └── best.pt            # YOLO pose weights
+│   └── best.pt            # YOLO Pose 权重文件
 ├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-## Quick Start
+## 快速开始
 
-### Option 1 — Docker Compose (recommended)
+### 方式一 — Docker Compose（推荐）
 
 ```bash
 git clone https://github.com/your-username/meter-vision.git
@@ -70,39 +63,37 @@ cd meter-vision
 docker-compose up --build
 ```
 
-- Web UI: http://localhost:8080
-- API:    http://localhost:9090/docs
+- Web UI：http://localhost:8080
+- API 文档：http://localhost:9090/docs
 
-### Option 2 — Run directly
+### 方式二 — 直接运行
 
-**Backend:**
+**启动后端：**
 ```bash
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 9090
 ```
 
-**Frontend:**
-
-Open `frontend/index.html` directly in your browser, or serve with any static server:
+**启动前端：**
 ```bash
-# Python built-in
+# 使用 Python 内置 HTTP 服务器
 python -m http.server 8080 --directory frontend
 ```
 
-Then open http://localhost:8080 and set the API server address to `http://<backend-ip>:9090`.
+打开 http://localhost:8080，将 API 地址设置为 `http://<后端IP>:9090`。
 
 ---
 
-## API Reference
+## API 说明
 
 ### `POST /detect`
 
-Upload an image file, returns keypoints and gauge reading.
+上传图片，返回关键点及仪表读数。
 
-**Request:** `multipart/form-data` with field `file`
+**请求：** `multipart/form-data`，字段名 `file`
 
-**Response:**
+**响应示例：**
 ```json
 {
   "people": [
@@ -110,7 +101,7 @@ Upload an image file, returns keypoints and gauge reading.
       "person_id": 0,
       "keypoints": [
         {"kp_id": 0, "x": 613.2, "y": 976.8, "conf": 0.984},
-        ...
+        "..."
       ],
       "box": [483.6, 782.9, 1186.1, 972.5]
     }
@@ -121,77 +112,71 @@ Upload an image file, returns keypoints and gauge reading.
     "confidence": 0.9872,
     "pointer_angle_deg": -12.3,
     "pivot": [613.2, 976.8],
-    "scale_points": [[1195.5, 863.8], ...]
+    "scale_points": [[1195.5, 863.8], "..."]
   }
 }
 ```
 
-### `GET /video_feed?source=<source>`
+### `GET /video_feed?source=<来源>`
 
-Returns an MJPEG stream with readings overlaid.
+返回叠加读数的 MJPEG 视频流。
 
-| `source` value | Meaning |
+| `source` 值 | 含义 |
 |---|---|
-| `0`, `1`, `2` | Local camera index |
-| `rtsp://192.168.1.100:554/stream` | RTSP IP camera |
+| `0`、`1` | 本地摄像头编号 |
+| `rtsp://192.168.1.100:554/stream` | RTSP IP 摄像头 |
 
 ### `GET /video_stop`
 
-Stops the active MJPEG stream.
+停止当前 MJPEG 视频流。
 
 ---
 
-## Keypoint Label Convention
+## 关键点约定
 
-| kp_id | Role | Scale value |
+| kp_id | 作用 | 刻度值 |
 |---|---|---|
-| 0 | Pointer base / rotation pivot | — |
-| 1 | Pointer mid point | — |
-| 2 | Pointer tip | — |
-| 3 | Scale mark | 0.0 |
-| 4 | Scale mark | 1.0 |
-| 5 | Scale mark | 2.0 |
-| 6 | Scale mark | 3.0 |
-| 7 | Scale mark | 4.0 |
-| 8 | Scale mark | 5.0 |
-| 9 | Scale mark | 6.0 |
+| 0 | 指针底部 / 旋转轴 | — |
+| 1 | 指针中部 | — |
+| 2 | 指针末端 | — |
+| 3–9 | 表盘刻度点 | 0.0 → 6.0 |
 
-To adapt to a different scale range, edit `SCALE_MAP` in `backend/gauge_reader.py`.
+如需适配不同量程，修改 `backend/gauge_reader.py` 中的 `SCALE_MAP` 即可。
 
 ---
 
-## Training Your Own Model
+## 训练自己的模型
 
-This project uses [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) with a custom keypoint configuration.
+项目基于 [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) 自定义关键点配置。
 
-1. Annotate images in COCO keypoint format (10 keypoints per gauge, order as above)
-2. Train:
+1. 按 COCO 关键点格式标注图片（每个仪表 10 个关键点，顺序同上）
+2. 训练：
    ```bash
    yolo pose train data=your_data.yaml model=yolov8n-pose.pt epochs=200 imgsz=640
    ```
-3. Replace `models/best.pt` with your trained weights
+3. 将训练好的权重替换 `models/best.pt`
 
 ---
 
-## Requirements
+## 环境要求
 
 - Python 3.10+
-- PyTorch (CPU or CUDA)
-- See `backend/requirements.txt` for full list
+- PyTorch（CPU 或 CUDA 均可）
+- 详见 `backend/requirements.txt`
 
 ---
 
-## License
+## 开源协议
 
-MIT License. See [LICENSE](LICENSE).
-
----
-
-## Acknowledgements
-
-- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) — pose estimation backbone
-- [FastAPI](https://fastapi.tiangolo.com/) — backend framework
+MIT License，详见 [LICENSE](LICENSE)。
 
 ---
 
-*If this project helps you, please give it a ⭐*
+## 致谢
+
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) — 姿态估计骨干网络
+- [FastAPI](https://fastapi.tiangolo.com/) — 后端框架
+
+---
+
+*如果这个项目对你有帮助，欢迎点个 ⭐*
