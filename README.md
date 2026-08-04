@@ -1,4 +1,4 @@
-# meter-vision
+# Meter-Vision
 
 <div align="right">
   <a href="README.En.md">English</a> | <strong>中文</strong>
@@ -92,6 +92,7 @@ python -m http.server 8080 --directory frontend
 上传图片，返回关键点及仪表读数。
 
 **请求：** `multipart/form-data`，字段名 `file`
+![示例图片](1.png "Test-Meter")
 
 **响应示例：**
 ```json

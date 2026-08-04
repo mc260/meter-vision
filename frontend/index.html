@@ -1,144 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>meter-vision</title>
+<title>meter-vision 仪表读数系统</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e0e0;min-height:100vh}
-header{background:#1a1d27;padding:16px 32px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2d3148}
-header h1{font-size:1.4rem;font-weight:600;color:#7eb6ff}
-header span{font-size:.85rem;color:#666}
-.container{max-width:1200px;margin:0 auto;padding:24px}
-.tabs{display:flex;gap:8px;margin-bottom:24px}
-.tab{padding:8px 22px;border-radius:6px;border:1px solid #2d3148;background:transparent;color:#aaa;cursor:pointer;font-size:.9rem;transition:.2s}
-.tab.active{background:#7eb6ff;color:#0f1117;border-color:#7eb6ff;font-weight:600}
+body{font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e0e0;min-height:100vh}
+header{background:#1a1d27;padding:14px 28px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2d3148}
+header h1{font-size:1.3rem;font-weight:700;color:#7eb6ff}
+header span{font-size:.82rem;color:#555}
+.container{max-width:1280px;margin:0 auto;padding:20px 24px}
+
+/* API bar */
+.api-bar{display:flex;gap:8px;align-items:center;background:#1a1d27;border:1px solid #2d3148;
+  border-radius:8px;padding:10px 16px;margin-bottom:18px}
+.api-bar label{font-size:.8rem;color:#666;white-space:nowrap}
+.api-bar input{flex:1;padding:6px 10px;border-radius:5px;border:1px solid #2d3148;
+  background:#0f1117;color:#e0e0e0;font-size:.85rem}
+.api-bar input:focus{outline:none;border-color:#7eb6ff}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:18px}
+.tab{padding:7px 20px;border-radius:6px;border:1px solid #2d3148;background:transparent;
+  color:#aaa;cursor:pointer;font-size:.88rem;transition:.15s}
+.tab.active{background:#7eb6ff;color:#0f1117;border-color:#7eb6ff;font-weight:700}
 .panel{display:none}.panel.active{display:block}
-.card{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:24px;margin-bottom:20px}
-.card h2{font-size:.85rem;font-weight:600;margin-bottom:16px;color:#666;letter-spacing:.07em;text-transform:uppercase}
-.upload-area{border:2px dashed #2d3148;border-radius:8px;padding:40px;text-align:center;cursor:pointer;transition:.2s;position:relative}
-.upload-area:hover,.upload-area.drag{border-color:#7eb6ff;background:#1e2235}
-.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-area p{color:#666;font-size:.9rem;margin-top:10px}
-.btn{padding:10px 24px;border-radius:6px;border:none;background:#7eb6ff;color:#0f1117;font-weight:600;cursor:pointer;font-size:.9rem;transition:.2s}
+
+/* Cards */
+.card{background:#1a1d27;border:1px solid #2d3148;border-radius:10px;padding:18px;margin-bottom:16px}
+.card-title{font-size:.78rem;font-weight:600;color:#555;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:14px}
+
+/* Thumbnail strip */
+.thumb-strip{display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-height:70px}
+.thumb-item{position:relative;width:60px;height:60px;border-radius:6px;
+  border:2px solid #2d3148;cursor:pointer;overflow:hidden;flex-shrink:0;transition:.15s}
+.thumb-item:hover{border-color:#7eb6ff}
+.thumb-item.active{border-color:#7eb6ff;box-shadow:0 0 0 2px rgba(126,182,255,.3)}
+.thumb-item img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-item .thumb-badge{position:absolute;top:2px;right:2px;font-size:12px;line-height:1}
+.thumb-add{width:60px;height:60px;border-radius:6px;border:2px dashed #2d3148;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:#555;font-size:22px;transition:.15s;flex-shrink:0;position:relative}
+.thumb-add:hover{border-color:#7eb6ff;color:#7eb6ff}
+.thumb-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* Image compare area */
+.img-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:680px){.img-compare{grid-template-columns:1fr}}
+.img-box{background:#0a0c12;border-radius:8px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;min-height:220px;position:relative}
+.img-box img,.img-box canvas{max-width:100%;max-height:480px;display:block}
+.img-box-label{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);
+  color:#aaa;font-size:.72rem;padding:2px 8px;border-radius:4px}
+.img-placeholder{color:#333;font-size:.85rem;text-align:center;padding:20px}
+
+/* Reading info row */
+.reading-row{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+@media(max-width:560px){.reading-row{grid-template-columns:1fr}}
+.reading-big{text-align:center;padding:16px 28px;background:#0a0c12;border-radius:8px}
+.reading-num{font-size:3.2rem;font-weight:700;color:#7eb6ff;line-height:1}
+.reading-unit{font-size:.78rem;color:#555;margin-top:4px;text-transform:uppercase;letter-spacing:.07em}
+.reading-meta{font-size:.83rem;color:#888;line-height:2;padding-top:4px}
+.badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.badge-ok{background:#1a3a1a;color:#4caf50}
+.badge-oor{background:#3a1a1a;color:#ff5f5f}
+.badge-err{background:#2a2a1a;color:#ffb74d}
+
+/* Keypoints table */
+.kp-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
+.kp-table th{color:#555;font-weight:500;text-align:left;padding:4px 8px;
+  border-bottom:1px solid #2d3148}
+.kp-table td{padding:4px 8px;color:#bbb}
+.kp-table tr:hover td{background:#1e2235}
+
+/* Buttons */
+.btn{padding:8px 20px;border-radius:6px;border:none;background:#7eb6ff;color:#0f1117;
+  font-weight:700;cursor:pointer;font-size:.88rem;transition:.15s}
 .btn:hover{background:#a0c8ff}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn-danger{background:#ff5f5f;color:#fff}
 .btn-danger:hover{background:#ff8080}
-.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:700px){.result-grid{grid-template-columns:1fr}}
-canvas{max-width:100%;border-radius:8px;display:block;margin:0 auto}
-.reading-box{background:#0f1117;border-radius:8px;padding:20px;text-align:center}
-.reading-value{font-size:3.5rem;font-weight:700;color:#7eb6ff;line-height:1}
-.reading-label{font-size:.8rem;color:#666;margin-top:6px;text-transform:uppercase;letter-spacing:.08em}
-.reading-meta{margin-top:16px;font-size:.83rem;color:#888;line-height:2}
-.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
-.badge-ok{background:#1a3a1a;color:#4caf50}
-.badge-oor{background:#3a1a1a;color:#ff5f5f}
-.stream-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.stream-row input{flex:1;min-width:220px;padding:9px 14px;border-radius:6px;border:1px solid #2d3148;background:#0f1117;color:#e0e0e0;font-size:.9rem}
-.stream-row input:focus{outline:none;border-color:#7eb6ff}
-#streamImg{max-width:100%;border-radius:8px;display:block;background:#111;min-height:220px}
-.status{font-size:.82rem;padding:4px 12px;border-radius:4px;background:#1a3a2a;color:#4caf50}
-.status.err{background:#3a1a1a;color:#ff5f5f}
-.kp-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.kp-table th{color:#666;font-weight:500;text-align:left;padding:5px 8px;border-bottom:1px solid #2d3148}
-.kp-table td{padding:5px 8px;color:#ccc}
-.kp-table tr:hover td{background:#1e2235}
-.api-row{display:flex;gap:8px;align-items:center;margin-bottom:20px}
-.api-row input{flex:1;padding:8px 12px;border-radius:6px;border:1px solid #2d3148;background:#0f1117;color:#e0e0e0;font-size:.85rem}
-.api-row input:focus{outline:none;border-color:#7eb6ff}
-.api-row label{font-size:.82rem;color:#666;white-space:nowrap}
+.btn-ghost{background:transparent;border:1px solid #2d3148;color:#888}
+.btn-ghost:hover{border-color:#7eb6ff;color:#7eb6ff;background:transparent}
+
+/* Stream panel */
+.stream-ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.stream-ctrl input{flex:1;min-width:220px;padding:8px 12px;border-radius:6px;
+  border:1px solid #2d3148;background:#0f1117;color:#e0e0e0;font-size:.88rem}
+.stream-ctrl input:focus{outline:none;border-color:#7eb6ff}
+#streamImg{max-width:100%;border-radius:8px;display:block;background:#0a0c12;min-height:240px}
+.status-chip{font-size:.8rem;padding:3px 10px;border-radius:4px}
+.status-chip.ok{background:#1a3a2a;color:#4caf50}
+.status-chip.err{background:#3a1a1a;color:#ff5f5f}
+.status-chip.idle{background:#222;color:#666}
+
+/* Upload dropzone (initial state) */
+.dropzone{border:2px dashed #2d3148;border-radius:8px;padding:36px;text-align:center;
+  cursor:pointer;transition:.2s;position:relative}
+.dropzone:hover,.dropzone.drag{border-color:#7eb6ff;background:#1e2235}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dropzone p{color:#555;font-size:.88rem;margin-top:10px}
 </style>
 </head>
 <body>
 <header>
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+  <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
     <circle cx="14" cy="14" r="12" stroke="#7eb6ff" stroke-width="2"/>
     <line x1="14" y1="14" x2="14" y2="5" stroke="#7eb6ff" stroke-width="2.5" stroke-linecap="round"/>
     <circle cx="14" cy="14" r="2.5" fill="#7eb6ff"/>
   </svg>
   <h1>meter-vision</h1>
-  <span>Pointer Gauge Reader</span>
+  <span>指针仪表自动读数系统</span>
 </header>
 
 <div class="container">
-  <div class="api-row">
-    <label>API Server:</label>
-    <input type="text" id="apiBase" value="" placeholder="http://127.0.0.1:9090">
+  <div class="api-bar">
+    <label>接口地址</label>
+    <input type="text" id="apiBase" placeholder="http://127.0.0.1:9090">
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('image',this)">&#128247; Image</button>
-    <button class="tab" onclick="switchTab('stream',this)">&#127909; Video Stream</button>
+    <button class="tab active" onclick="switchTab('image',this)">&#128247; 图片检测</button>
+    <button class="tab" onclick="switchTab('stream',this)">&#127909; 视频流</button>
   </div>
 
-  <!-- IMAGE PANEL -->
+  <!-- ========== 图片检测面板 ========== -->
   <div id="panel-image" class="panel active">
-    <div class="card">
-      <h2>Upload Image</h2>
-      <div class="upload-area" id="dropzone">
-        <input type="file" id="fileInput" accept="image/*">
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto;display:block">
-          <rect width="40" height="40" rx="8" fill="#1e2235"/>
-          <path d="M20 12v16M12 20l8-8 8 8" stroke="#7eb6ff" stroke-width="2.2"
+
+    <!-- 初始上传区（无图时显示） -->
+    <div id="initDrop" class="card">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto">
+          <rect width="44" height="44" rx="10" fill="#1e2235"/>
+          <path d="M22 13v18M13 22l9-9 9 9" stroke="#7eb6ff" stroke-width="2.2"
                 stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <p>Drag &amp; drop or click to select an image</p>
-      </div>
-      <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-        <button class="btn" id="detectBtn" onclick="runDetect()" disabled>Detect</button>
-        <span id="imgStatus" style="font-size:.85rem;color:#888"></span>
+        <p>拖拽或点击选择图片（支持多选）</p>
       </div>
     </div>
 
-    <div class="result-grid" id="resultGrid" style="display:none">
-      <div class="card" style="margin:0">
-        <h2>Annotated Image</h2>
-        <canvas id="resultCanvas"></canvas>
-      </div>
-      <div class="card" style="margin:0">
-        <h2>Reading</h2>
-        <div class="reading-box">
-          <div class="reading-value" id="readingValue">&#8212;</div>
-          <div class="reading-label">Scale Value</div>
-          <div class="reading-meta" id="readingMeta"></div>
-        </div>
-        <div style="margin-top:20px">
-          <h2 style="margin-bottom:8px">Keypoints</h2>
-          <table class="kp-table">
-            <thead><tr><th>ID</th><th>X</th><th>Y</th><th>Conf</th></tr></thead>
-            <tbody id="kpTableBody"></tbody>
-          </table>
+    <!-- 有图后的工作区 -->
+    <div id="workArea" style="display:none">
+
+      <!-- 缩略图栏 -->
+      <div class="card">
+        <div class="card-title">已上传图片</div>
+        <div class="thumb-strip" id="thumbStrip">
+          <!-- thumbnails injected here -->
+          <div class="thumb-add" title="继续添加图片">
+            <input type="file" id="addMoreInput" accept="image/*" multiple>
+            &#43;
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- 图片对比 -->
+      <div class="img-compare">
+        <div class="card" style="margin:0;padding:12px">
+          <div class="card-title">原始图片</div>
+          <div class="img-box" id="origBox">
+            <div class="img-placeholder">请选择图片</div>
+          </div>
+        </div>
+        <div class="card" style="margin:0;padding:12px">
+          <div class="card-title">检测结果</div>
+          <div class="img-box" id="resultBox">
+            <div class="img-placeholder">等待检测...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 读数信息 -->
+      <div class="card" id="readingCard" style="margin-top:12px">
+        <div class="card-title">读数信息</div>
+        <div class="reading-row">
+          <div class="reading-big">
+            <div class="reading-num" id="readingNum">—</div>
+            <div class="reading-unit">刻度值</div>
+          </div>
+          <div>
+            <div class="reading-meta" id="readingMeta" style="color:#555">等待检测...</div>
+            <div style="margin-top:12px">
+              <div class="card-title" style="margin-bottom:6px">关键点列表</div>
+              <table class="kp-table">
+                <thead><tr><th>编号</th><th>X坐标</th><th>Y坐标</th><th>置信度</th></tr></thead>
+                <tbody id="kpBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /workArea -->
   </div>
 
-  <!-- STREAM PANEL -->
+  <!-- ========== 视频流面板 ========== -->
   <div id="panel-stream" class="panel">
     <div class="card">
-      <h2>Video Stream</h2>
-      <div class="stream-row">
+      <div class="card-title">视频流来源</div>
+      <div class="stream-ctrl">
         <input type="text" id="streamSrc" value="0"
-               placeholder="Camera index (0,1,...) or rtsp://ip/stream">
-        <button class="btn" id="startBtn" onclick="startStream()">Start</button>
-        <button class="btn btn-danger" id="stopBtn" onclick="stopStream()" disabled>Stop</button>
-        <span id="streamStatus"></span>
+               placeholder="摄像头编号（0）或 rtsp://ip/stream">
+        <button class="btn" id="startBtn" onclick="startStream()">开始推流</button>
+        <button class="btn btn-danger" id="stopBtn" onclick="stopStream()" disabled>停止</button>
+        <span class="status-chip idle" id="streamStatus">未连接</span>
       </div>
-      <img id="streamImg" alt="Stream output will appear here">
+      <img id="streamImg" alt="视频流将在此处显示">
+      <p style="margin-top:8px;font-size:.78rem;color:#444">
+        提示：视频帧中已实时叠加关键点标注与仪表读数。
+      </p>
     </div>
   </div>
-</div>
+
+</div><!-- /container -->
 
 <script>
-// ---- API base (auto-detect same host, port 9090) ----
+// ============================================================
+// 配置
+// ============================================================
 const apiInput = document.getElementById('apiBase');
-apiInput.value = `http://${location.hostname || '127.0.0.1'}:9090`;
+apiInput.value = 'http://' + (location.hostname || '127.0.0.1') + ':9090';
 const getAPI = () => apiInput.value.replace(/\/+$/, '');
 
-// ---- Tab switching ----
+// ============================================================
+// Tab 切换
+// ============================================================
 function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -146,187 +235,256 @@ function switchTab(name, btn) {
   document.getElementById('panel-' + name).classList.add('active');
 }
 
-// ---- Image detection ----
-let selectedFile = null;
-const fileInput  = document.getElementById('fileInput');
-const dropzone   = document.getElementById('dropzone');
-const detectBtn  = document.getElementById('detectBtn');
+// ============================================================
+// 图片检测
+// ============================================================
 
-fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+// items[i] = { file, objectUrl, status: 'pending'|'processing'|'done'|'error', data }
+let items = [];
+let currentIdx = -1;
+
+// ---- 文件输入 & 拖拽 ----
+const fileInput   = document.getElementById('fileInput');
+const dropzone    = document.getElementById('dropzone');
+const addMoreInput = document.getElementById('addMoreInput');
+
+fileInput.addEventListener('change', e => addFiles(e.target.files));
+addMoreInput.addEventListener('change', e => addFiles(e.target.files));
+
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
 dropzone.addEventListener('drop', e => {
   e.preventDefault(); dropzone.classList.remove('drag');
-  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  addFiles(e.dataTransfer.files);
 });
 
-function loadFile(file) {
-  selectedFile = file;
-  detectBtn.disabled = false;
-  document.getElementById('imgStatus').textContent = file.name;
+function addFiles(fileList) {
+  if (!fileList || !fileList.length) return;
+  const startIdx = items.length;
+  for (const f of fileList) {
+    items.push({ file: f, objectUrl: URL.createObjectURL(f),
+                 status: 'pending', data: null });
+  }
+  showWorkArea();
+  renderThumbs();
+  if (currentIdx < 0) selectItem(startIdx);
+  // auto-detect all pending
+  items.forEach((item, i) => { if (item.status === 'pending') detectItem(i); });
 }
 
-async function runDetect() {
-  if (!selectedFile) return;
-  detectBtn.disabled = true;
-  document.getElementById('imgStatus').textContent = 'Detecting...';
+function showWorkArea() {
+  document.getElementById('initDrop').style.display = 'none';
+  document.getElementById('workArea').style.display  = 'block';
+}
+
+// ---- 缩略图渲染 ----
+function renderThumbs() {
+  const strip = document.getElementById('thumbStrip');
+  // remove existing thumb items (keep the + button)
+  strip.querySelectorAll('.thumb-item').forEach(el => el.remove());
+  const addBtn = strip.querySelector('.thumb-add');
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'thumb-item' + (i === currentIdx ? ' active' : '');
+    div.onclick = () => selectItem(i);
+    const img = document.createElement('img');
+    img.src = item.objectUrl;
+    const badge = document.createElement('span');
+    badge.className = 'thumb-badge';
+    badge.textContent = { pending:'', processing:'⏳', done:'✅', error:'❌' }[item.status] || '';
+    div.appendChild(img);
+    div.appendChild(badge);
+    strip.insertBefore(div, addBtn);
+  });
+}
+
+// ---- 选中某张图 ----
+function selectItem(idx) {
+  currentIdx = idx;
+  renderThumbs();
+  const item = items[idx];
+
+  // 左侧原图
+  const origBox = document.getElementById('origBox');
+  origBox.innerHTML = '';
+  const origImg = document.createElement('img');
+  origImg.src = item.objectUrl;
+  origBox.appendChild(origImg);
+
+  // 右侧结果
+  const resultBox = document.getElementById('resultBox');
+  resultBox.innerHTML = '';
+  if (item.status === 'done' && item.data) {
+    const canvas = document.createElement('canvas');
+    resultBox.appendChild(canvas);
+    const src = new Image();
+    src.onload = () => {
+      canvas.width = src.width; canvas.height = src.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(src, 0, 0);
+      drawOverlay(ctx, item.data);
+    };
+    src.src = item.objectUrl;
+    showReading(item.data);
+  } else if (item.status === 'processing') {
+    resultBox.innerHTML = '<div class="img-placeholder">检测中…</div>';
+    document.getElementById('readingNum').textContent = '—';
+    document.getElementById('readingMeta').innerHTML = '<span style="color:#555">检测中...</span>';
+    document.getElementById('kpBody').innerHTML = '';
+  } else if (item.status === 'error') {
+    resultBox.innerHTML = '<div class="img-placeholder" style="color:#ff5f5f">检测失败</div>';
+  } else {
+    resultBox.innerHTML = '<div class="img-placeholder">等待检测...</div>';
+  }
+}
+
+// ---- 单张检测 ----
+async function detectItem(idx) {
+  items[idx].status = 'processing';
+  if (currentIdx === idx) selectItem(idx);
+  else renderThumbs();
 
   const form = new FormData();
-  form.append('file', selectedFile);
-
-  let data;
+  form.append('file', items[idx].file);
   try {
-    const resp = await fetch(`${getAPI()}/detect`, { method: 'POST', body: form });
+    const resp = await fetch(getAPI() + '/detect', { method: 'POST', body: form });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    data = await resp.json();
-  } catch (e) {
-    document.getElementById('imgStatus').textContent = 'Error: ' + e.message;
-    detectBtn.disabled = false;
-    return;
+    items[idx].data   = await resp.json();
+    items[idx].status = 'done';
+  } catch(e) {
+    items[idx].status = 'error';
+    items[idx].data   = null;
+    console.warn('检测失败:', items[idx].file.name, e);
   }
+  renderThumbs();
+  if (currentIdx === idx) selectItem(idx);
+}
 
-  detectBtn.disabled = false;
-  document.getElementById('imgStatus').textContent = 'Done';
-  document.getElementById('resultGrid').style.display = 'grid';
-
-  // Draw on canvas
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.getElementById('resultCanvas');
-    canvas.width  = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    drawOverlay(ctx, data);
-  };
-  img.src = URL.createObjectURL(selectedFile);
-
-  // Reading panel
-  const r = data.reading;
+// ---- 读数信息展示 ----
+function showReading(data) {
+  const r = data && data.reading;
   if (r && !r.error) {
-    document.getElementById('readingValue').textContent = r.value.toFixed(2);
+    document.getElementById('readingNum').textContent = r.value.toFixed(2);
     const oor = r.out_of_range;
     document.getElementById('readingMeta').innerHTML =
-      `<span class="badge ${oor ? 'badge-oor' : 'badge-ok'}">${oor ? 'Out of range' : 'In range'}</span><br>
-       Pointer angle: ${r.pointer_angle_deg}&deg;<br>
-       Confidence: ${(r.confidence * 100).toFixed(1)}%<br>
-       Pivot: (${r.pivot[0]}, ${r.pivot[1]})`;
+      '<span class="badge ' + (oor?'badge-oor':'badge-ok') + '">' +
+      (oor ? '超量程' : '正常范围') + '</span><br>' +
+      '指针角度：' + r.pointer_angle_deg + '°<br>' +
+      '置信度：' + (r.confidence*100).toFixed(1) + '%<br>' +
+      '旋转轴坐标：(' + r.pivot[0] + ', ' + r.pivot[1] + ')';
   } else {
-    document.getElementById('readingValue').textContent = r ? r.error : 'No gauge';
-    document.getElementById('readingMeta').innerHTML = '';
+    document.getElementById('readingNum').textContent = '—';
+    document.getElementById('readingMeta').innerHTML =
+      '<span class="badge badge-err">' + (r ? r.error : '未检测到仪表') + '</span>';
   }
-
   // Keypoints table
-  const tbody = document.getElementById('kpTableBody');
+  const tbody = document.getElementById('kpBody');
   tbody.innerHTML = '';
-  if (data.people && data.people[0]) {
+  if (data && data.people && data.people[0]) {
     data.people[0].keypoints.forEach(kp => {
       const tr = document.createElement('tr');
-      const conf = (kp.conf * 100).toFixed(0);
-      tr.innerHTML = `<td>${kp.kp_id}</td><td>${kp.x.toFixed(1)}</td>` +
-                     `<td>${kp.y.toFixed(1)}</td><td>${conf}%</td>`;
+      tr.innerHTML = '<td>' + kp.kp_id + '</td><td>' + kp.x.toFixed(1) + '</td>' +
+                     '<td>' + kp.y.toFixed(1) + '</td><td>' +
+                     (kp.conf*100).toFixed(0) + '%</td>';
       tbody.appendChild(tr);
     });
   }
 }
 
-// ---- Canvas overlay ----
+// ---- Canvas 标注叠加 ----
 function drawOverlay(ctx, data) {
-  if (!data.people || !data.people.length) return;
+  if (!data || !data.people || !data.people.length) return;
   const kps = {};
   data.people[0].keypoints.forEach(k => { if (k.conf >= 0.5) kps[k.kp_id] = k; });
 
-  // Skeleton (pointer arm)
+  // 骨架（指针臂）
   [[0,1],[1,2]].forEach(([a,b]) => {
     if (kps[a] && kps[b]) {
-      ctx.beginPath(); ctx.moveTo(kps[a].x, kps[a].y); ctx.lineTo(kps[b].x, kps[b].y);
-      ctx.strokeStyle = 'rgba(255,165,0,.9)'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(kps[a].x,kps[a].y); ctx.lineTo(kps[b].x,kps[b].y);
+      ctx.strokeStyle='rgba(255,165,0,.9)'; ctx.lineWidth=2.5; ctx.stroke();
     }
   });
 
-  // Keypoints
+  // 关键点
   Object.values(kps).forEach(kp => {
-    ctx.beginPath(); ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
-    ctx.fillStyle = '#ff3333'; ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Arial';
-    ctx.fillText(kp.kp_id, kp.x + 7, kp.y - 4);
+    ctx.beginPath(); ctx.arc(kp.x,kp.y,5,0,2*Math.PI);
+    ctx.fillStyle='#ff3333'; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 11px Arial';
+    ctx.fillText(kp.kp_id, kp.x+7, kp.y-4);
   });
 
   const r = data.reading;
   if (!r || r.error) return;
 
-  const [px, py]  = r.pivot;
-  const scaleArr  = r.scale_points;
-  const meanR     = scaleArr.reduce((s, [sx, sy]) => s + Math.hypot(sx-px, sy-py), 0) / scaleArr.length;
+  const [px,py] = r.pivot;
+  const spts    = r.scale_points;
+  const meanR   = spts.reduce((s,[sx,sy])=>s+Math.hypot(sx-px,sy-py),0)/spts.length;
 
-  // Scale rays
-  scaleArr.forEach(([sx, sy]) => {
-    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx, sy);
-    ctx.strokeStyle = 'rgba(0,220,100,.55)'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.beginPath(); ctx.arc(sx, sy, 4, 0, 2*Math.PI);
-    ctx.fillStyle = 'rgba(0,220,100,.9)'; ctx.fill();
+  // 刻度射线
+  spts.forEach(([sx,sy]) => {
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(sx,sy);
+    ctx.strokeStyle='rgba(0,220,100,.5)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx,sy,4,0,2*Math.PI);
+    ctx.fillStyle='rgba(0,220,100,.9)'; ctx.fill();
   });
 
-  // Pivot marker
-  ctx.beginPath(); ctx.arc(px, py, 10, 0, 2*Math.PI);
-  ctx.strokeStyle = '#0f0'; ctx.lineWidth = 2; ctx.stroke();
+  // 旋转轴标记
+  ctx.beginPath(); ctx.arc(px,py,10,0,2*Math.PI);
+  ctx.strokeStyle='#0f0'; ctx.lineWidth=2; ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(px-14, py); ctx.lineTo(px+14, py);
-  ctx.moveTo(px, py-14); ctx.lineTo(px, py+14);
-  ctx.strokeStyle = '#0f0'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.moveTo(px-14,py);ctx.lineTo(px+14,py);
+  ctx.moveTo(px,py-14);ctx.lineTo(px,py+14);
+  ctx.strokeStyle='#0f0'; ctx.lineWidth=2; ctx.stroke();
 
-  // Pointer arrow
-  const rad   = r.pointer_angle_deg * Math.PI / 180;
-  const tx    = px + meanR * Math.cos(rad);
-  const ty    = py + meanR * Math.sin(rad);
-  const color = r.out_of_range ? '#ff3333' : '#ff8800';
-  drawArrow(ctx, px, py, tx, ty, color);
+  // 指针箭头
+  const rad=r.pointer_angle_deg*Math.PI/180;
+  const tx=px+meanR*Math.cos(rad), ty=py+meanR*Math.sin(rad);
+  const col=r.out_of_range?'#ff3333':'#ff8800';
+  _arrow(ctx,px,py,tx,ty,col);
 
-  // Reading label
-  const label = r.value.toFixed(2) + (r.out_of_range ? ' [OOR]' : '');
-  ctx.font = 'bold 18px Arial';
-  const tw = ctx.measureText(label).width;
-  const lx = Math.max(tx - tw / 2, 4);
-  const ly = ty > 40 ? ty - 18 : ty + 30;
-  ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(lx - 4, ly - 18, tw + 8, 26);
-  ctx.fillStyle = '#fff'; ctx.fillText(label, lx, ly);
+  // 读数标签
+  const label=r.value.toFixed(2)+(r.out_of_range?' [超程]':'');
+  ctx.font='bold 18px Arial';
+  const tw=ctx.measureText(label).width;
+  const lx=Math.max(tx-tw/2,4), ly=ty>40?ty-18:ty+30;
+  ctx.fillStyle='rgba(0,0,0,.75)'; ctx.fillRect(lx-4,ly-18,tw+8,26);
+  ctx.fillStyle='#fff'; ctx.fillText(label,lx,ly);
 }
 
-function drawArrow(ctx, x1, y1, x2, y2, color) {
-  const ang = Math.atan2(y2 - y1, x2 - x1);
-  const hs  = 14;
-  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+function _arrow(ctx,x1,y1,x2,y2,color){
+  const ang=Math.atan2(y2-y1,x2-x1),hs=14;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=color;ctx.lineWidth=3;ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - hs * Math.cos(ang - 0.4), y2 - hs * Math.sin(ang - 0.4));
-  ctx.lineTo(x2 - hs * Math.cos(ang + 0.4), y2 - hs * Math.sin(ang + 0.4));
-  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-hs*Math.cos(ang-.4),y2-hs*Math.sin(ang-.4));
+  ctx.lineTo(x2-hs*Math.cos(ang+.4),y2-hs*Math.sin(ang+.4));
+  ctx.closePath();ctx.fillStyle=color;ctx.fill();
 }
 
-// ---- Video Stream ----
-function startStream() {
-  const src = document.getElementById('streamSrc').value.trim() || '0';
-  const img = document.getElementById('streamImg');
-  img.src   = `${getAPI()}/video_feed?source=${encodeURIComponent(src)}&_t=${Date.now()}`;
-  document.getElementById('startBtn').disabled  = true;
-  document.getElementById('stopBtn').disabled   = false;
-  document.getElementById('streamStatus').textContent = 'Streaming...';
-  document.getElementById('streamStatus').className   = 'status';
-  img.onerror = () => {
-    document.getElementById('streamStatus').textContent = 'Stream error';
-    document.getElementById('streamStatus').className   = 'status err';
+// ============================================================
+// 视频流
+// ============================================================
+function startStream(){
+  const src=document.getElementById('streamSrc').value.trim()||'0';
+  const img=document.getElementById('streamImg');
+  img.src=getAPI()+'/video_feed?source='+encodeURIComponent(src)+'&_t='+Date.now();
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('stopBtn').disabled=false;
+  const chip=document.getElementById('streamStatus');
+  chip.textContent='推流中'; chip.className='status-chip ok';
+  img.onerror=()=>{
+    chip.textContent='连接失败'; chip.className='status-chip err';
     stopStream();
   };
 }
-
-async function stopStream() {
-  document.getElementById('streamImg').src = '';
-  document.getElementById('startBtn').disabled  = false;
-  document.getElementById('stopBtn').disabled   = true;
-  document.getElementById('streamStatus').textContent = 'Stopped';
-  document.getElementById('streamStatus').className   = 'status';
-  try { await fetch(`${getAPI()}/video_stop`); } catch(e) {}
+async function stopStream(){
+  document.getElementById('streamImg').src='';
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('stopBtn').disabled=true;
+  const chip=document.getElementById('streamStatus');
+  chip.textContent='已停止'; chip.className='status-chip idle';
+  try{await fetch(getAPI()+'/video_stop');}catch(e){}
 }
 </script>
 </body>
