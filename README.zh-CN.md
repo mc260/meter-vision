@@ -158,6 +158,8 @@ docker-compose up --build
 
 ## 训练自己的模型
 
+![示例图片](image.png "Test Meter")
+
 基于 [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) 自定义关键点配置。
 
 1. 按 COCO 关键点格式标注（每个仪表 10 个关键点，顺序同上）

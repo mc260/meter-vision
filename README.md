@@ -158,6 +158,8 @@ Stops the active stream. Returns `{"status": "stopped"}`.
 
 ## Training Your Own Model
 
+![示例图片](image.png "Test Meter")
+
 Uses [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) with a custom keypoint config.
 
 1. Annotate images in COCO keypoint format (10 keypoints per gauge, order as above)
