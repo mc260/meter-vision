@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>meter-vision 仪表读数系统</title>
+<title>meter-vision</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e0e0;min-height:100vh}
 header{background:#1a1d27;padding:14px 28px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2d3148}
 header h1{font-size:1.3rem;font-weight:700;color:#7eb6ff}
-header span{font-size:.82rem;color:#555}
+header span{font-size:.82rem;color:#666}
 .container{max-width:1280px;margin:0 auto;padding:20px 24px}
 .api-bar{display:flex;gap:8px;align-items:center;background:#1a1d27;border:1px solid #2d3148;border-radius:8px;padding:10px 16px;margin-bottom:18px}
 .api-bar label{font-size:.8rem;color:#666;white-space:nowrap}
@@ -22,20 +22,20 @@ header span{font-size:.82rem;color:#555}
 .card{background:#1a1d27;border:1px solid #2d3148;border-radius:10px;padding:18px;margin-bottom:16px}
 .card-title{font-size:.78rem;font-weight:600;color:#555;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
 .thumb-strip{display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-height:72px}
-.thumb-item{position:relative;width:64px;height:64px;border-radius:6px;border:2px solid #2d3148;cursor:pointer;overflow:visible;flex-shrink:0;transition:.15s}
+.thumb-item{position:relative;width:64px;height:64px;border-radius:6px;border:2px solid #2d3148;cursor:pointer;flex-shrink:0;transition:.15s}
 .thumb-item:hover{border-color:#7eb6ff}
 .thumb-item.active{border-color:#7eb6ff;box-shadow:0 0 0 2px rgba(126,182,255,.3)}
 .thumb-item img{width:100%;height:100%;object-fit:cover;display:block;border-radius:4px}
-.thumb-badge{position:absolute;top:2px;right:2px;font-size:11px;line-height:1;pointer-events:none}
-.thumb-del{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;background:#ff5f5f;color:#fff;font-size:11px;line-height:18px;text-align:center;cursor:pointer;display:none;z-index:10;border:none;padding:0}
+.thumb-badge{position:absolute;top:2px;right:2px;font-size:11px;pointer-events:none}
+.thumb-del{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;background:#ff5f5f;color:#fff;font-size:12px;line-height:18px;text-align:center;cursor:pointer;display:none;z-index:10;border:none;padding:0}
 .thumb-item:hover .thumb-del{display:block}
-.thumb-add{width:64px;height:64px;border-radius:6px;border:2px dashed #2d3148;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555;font-size:24px;transition:.15s;flex-shrink:0;position:relative}
+.thumb-add{width:64px;height:64px;border-radius:6px;border:2px dashed #2d3148;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555;font-size:26px;transition:.15s;flex-shrink:0;position:relative}
 .thumb-add:hover{border-color:#7eb6ff;color:#7eb6ff}
 .thumb-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .img-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 @media(max-width:680px){.img-compare{grid-template-columns:1fr}}
-.img-box{background:#0a0c12;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:220px}
-.img-box img,.img-box canvas{max-width:100%;max-height:500px;display:block}
+.img-box{background:#0a0c12;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:200px}
+.img-box img,.img-box canvas{max-width:100%;max-height:520px;display:block}
 .img-placeholder{color:#333;font-size:.85rem;text-align:center;padding:20px}
 .reading-row{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
 @media(max-width:560px){.reading-row{grid-template-columns:1fr}}
@@ -78,69 +78,67 @@ header span{font-size:.82rem;color:#555}
     <circle cx="14" cy="14" r="2.5" fill="#7eb6ff"/>
   </svg>
   <h1>meter-vision</h1>
-  <span>指针仪表自动读数系统</span>
+  <span>&#25351;&#38024;&#20272;&#34920;&#33258;&#21160;&#35835;&#25968;&#31995;&#32479;</span>
 </header>
 
 <div class="container">
   <div class="api-bar">
-    <label>接口地址</label>
+    <label>&#25509;&#21475;&#22320;&#22336;</label>
     <input type="text" id="apiBase" placeholder="http://127.0.0.1:9090">
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('image',this)">&#128247; 图片检测</button>
-    <button class="tab" onclick="switchTab('stream',this)">&#127909; 视频流</button>
+    <button class="tab active" onclick="switchTab('image',this)">&#128247; &#22270;&#29255;&#26816;&#27979;</button>
+    <button class="tab" onclick="switchTab('stream',this)">&#127909; &#35270;&#39057;&#27969;</button>
   </div>
 
-  <!-- 图片检测 -->
+  <!-- image tab -->
   <div id="panel-image" class="panel active">
     <div id="initDrop" class="card">
       <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" accept="image/*" multiple>
         <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto">
           <rect width="44" height="44" rx="10" fill="#1e2235"/>
-          <path d="M22 13v18M13 22l9-9 9 9" stroke="#7eb6ff" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 13v18M13 22l9-9 9 9" stroke="#7eb6ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <p>拖拽或点击选择图片（支持多选）</p>
+        <p>&#25320;&#25168;&#25110;&#28857;&#20987;&#36873;&#25321;&#22270;&#29255;&#65288;&#25903;&#25345;&#22810;&#36873;&#65289;</p>
       </div>
     </div>
 
     <div id="workArea" style="display:none">
       <div class="card">
-        <div class="card-title">已上传图片 &mdash; 悬停缩略图可删除</div>
+        <div class="card-title">&#24050;&#19978;&#20256;&#22270;&#29255; &mdash; &#24481;&#21010;&#32553;&#30053;&#22270;&#21487;&#21024;&#38500;</div>
         <div class="thumb-strip" id="thumbStrip">
-          <div class="thumb-add" title="继续添加">
-            <input type="file" id="addMoreInput" accept="image/*" multiple>
-            &#43;
+          <div class="thumb-add" title="&#32487;&#32493;&#28155;&#21152;">
+            <input type="file" id="addMoreInput" accept="image/*" multiple>&#43;
           </div>
         </div>
       </div>
 
       <div class="img-compare">
         <div class="card" style="margin:0;padding:12px">
-          <div class="card-title">原始图片</div>
-          <div class="img-box" id="origBox"><div class="img-placeholder">请选择图片</div></div>
+          <div class="card-title">&#21407;&#22987;&#22270;&#29255;</div>
+          <div class="img-box" id="origBox"><div class="img-placeholder">&#35831;&#36873;&#25321;&#22270;&#29255;</div></div>
         </div>
         <div class="card" style="margin:0;padding:12px">
-          <div class="card-title">检测结果</div>
-          <div class="img-box" id="resultBox"><div class="img-placeholder">等待检测...</div></div>
+          <div class="card-title">&#26816;&#27979;&#32467;&#26524;</div>
+          <div class="img-box" id="resultBox"><div class="img-placeholder">&#31561;&#24453;&#26816;&#27979;...</div></div>
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div class="card-title">读数信息</div>
+        <div class="card-title">&#35835;&#25968;&#20449;&#24687;</div>
         <div class="reading-row">
           <div class="reading-big">
             <div class="reading-num" id="readingNum">&#8212;</div>
-            <div class="reading-unit">刻度值</div>
+            <div class="reading-unit">&#21010;&#24230;&#20540;</div>
           </div>
           <div>
-            <div class="reading-meta" id="readingMeta" style="color:#444">等待检测...</div>
+            <div class="reading-meta" id="readingMeta" style="color:#444">&#31561;&#24453;&#26816;&#27979;...</div>
             <div style="margin-top:12px">
-              <div class="card-title" style="margin-bottom:6px">关键点列表</div>
+              <div class="card-title" style="margin-bottom:6px">&#20851;&#38190;&#28857;&#21015;&#34920;</div>
               <table class="kp-table">
-                <thead><tr><th>编号</th><th>X坐标</th><th>Y坐标</th><th>置信度</th></tr></thead>
+                <thead><tr><th>&#32534;&#21495;</th><th>X&#22352;&#26631;</th><th>Y&#22352;&#26631;</th><th>&#32622;&#20449;&#24230;</th></tr></thead>
                 <tbody id="kpBody"></tbody>
               </table>
             </div>
@@ -150,32 +148,26 @@ header span{font-size:.82rem;color:#555}
     </div>
   </div>
 
-  <!-- 视频流 -->
+  <!-- stream tab -->
   <div id="panel-stream" class="panel">
     <div class="card">
-      <div class="card-title">视频流来源</div>
+      <div class="card-title">&#35270;&#39057;&#27969;&#26469;&#28304;</div>
       <div class="stream-ctrl">
-        <input type="text" id="streamSrc" value="0"
-               placeholder="摄像头编号（0、1...）或 rtsp://ip/stream">
-        <button class="btn" id="startBtn" onclick="startStream()">开始推流</button>
-        <button class="btn btn-danger" id="stopBtn" onclick="stopStream()" disabled>停止</button>
-        <span class="status-chip idle" id="streamStatus">未连接</span>
+        <input type="text" id="streamSrc" value="0" placeholder="&#25444;&#20687;&#22836;&#32534;&#21495;(0,1...)&#25110; rtsp://ip/stream">
+        <button class="btn" id="startBtn" onclick="startStream()">&#24320;&#22987;&#25512;&#27969;</button>
+        <button class="btn btn-danger" id="stopBtn" onclick="stopStream()" disabled>&#20572;&#27490;</button>
+        <span class="status-chip idle" id="streamStatus">&#26410;&#36830;&#25509;</span>
       </div>
-      <img id="streamImg" alt="视频流将在此处显示">
+      <img id="streamImg" alt="&#35270;&#39057;&#27969;&#23558;&#22312;&#27492;&#22788;&#26174;&#31034;">
       <p style="margin-top:8px;font-size:.78rem;color:#444">
-        视频帧中已实时叠加关键点标注与仪表读数。摄像头编号通常为 0（内置）或 1（外接）。
+        &#25444;&#20687;&#22836;&#32534;&#21495;&#36890;&#24120;&#20026; 0&#65288;&#20869;&#32622;&#65289;&#25110; 1&#65288;&#22806;&#25509;USB&#65289;&#12290;
       </p>
     </div>
   </div>
 </div>
-
 <script>
-// API 地址 — 默认同源同端口（适配 FastAPI 托管前端的场景）
+// API base — default to same origin so FastAPI serves both
 const apiInput = document.getElementById('apiBase');
-apiInput.value = location.origin.replace(/:(\d+)$/, '') +
-                 (location.port ? ':' + location.port : '') ||
-                 'http://127.0.0.1:9090';
-// simpler: just use same origin
 apiInput.value = location.origin || 'http://127.0.0.1:9090';
 const getAPI = () => apiInput.value.replace(/\/+$/, '');
 
@@ -187,41 +179,34 @@ function switchTab(name, btn) {
 }
 
 // ---- image items ----
-// [{file, objectUrl, status:'pending'|'processing'|'done'|'error', data}]
-let items = [];
-let currentIdx = -1;
+let items = [], currentIdx = -1;
 
 document.getElementById('fileInput').addEventListener('change', e => addFiles(e.target.files));
 document.getElementById('addMoreInput').addEventListener('change', e => addFiles(e.target.files));
 
-const dropzone = document.getElementById('dropzone');
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
-dropzone.addEventListener('drop', e => {
-  e.preventDefault(); dropzone.classList.remove('drag');
-  addFiles(e.dataTransfer.files);
-});
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); addFiles(e.dataTransfer.files); });
 
-function addFiles(fileList) {
-  if (!fileList || !fileList.length) return;
-  const startIdx = items.length;
-  for (const f of fileList) {
-    items.push({ file: f, objectUrl: URL.createObjectURL(f), status: 'pending', data: null });
-  }
+function addFiles(list) {
+  if (!list || !list.length) return;
+  const start = items.length;
+  Array.from(list).forEach(f => items.push({ file: f, url: URL.createObjectURL(f), status: 'pending', data: null }));
   document.getElementById('initDrop').style.display = 'none';
-  document.getElementById('workArea').style.display  = 'block';
+  document.getElementById('workArea').style.display = 'block';
   renderThumbs();
-  if (currentIdx < 0 || currentIdx >= items.length) selectItem(startIdx);
-  items.forEach((item, i) => { if (item.status === 'pending') detectItem(i); });
+  if (currentIdx < 0) selectItem(start);
+  items.forEach((it, i) => { if (it.status === 'pending') detectItem(i); });
 }
 
 function deleteItem(idx) {
-  URL.revokeObjectURL(items[idx].objectUrl);
+  URL.revokeObjectURL(items[idx].url);
   items.splice(idx, 1);
   if (!items.length) {
     currentIdx = -1;
     document.getElementById('initDrop').style.display = 'block';
-    document.getElementById('workArea').style.display  = 'none';
+    document.getElementById('workArea').style.display = 'none';
     return;
   }
   if (currentIdx >= items.length) currentIdx = items.length - 1;
@@ -229,93 +214,71 @@ function deleteItem(idx) {
   selectItem(currentIdx);
 }
 
+const BADGE = { pending: '', processing: '&#9203;', done: '&#9989;', error: '&#10060;' };
+
 function renderThumbs() {
-  const strip  = document.getElementById('thumbStrip');
-  const addBtn = strip.querySelector('.thumb-add');
+  const strip = document.getElementById('thumbStrip');
+  const add   = strip.querySelector('.thumb-add');
   strip.querySelectorAll('.thumb-item').forEach(el => el.remove());
-  const BADGE = { pending:'', processing:'⏳', done:'✅', error:'❌' };
-  items.forEach((item, i) => {
+  items.forEach((it, i) => {
     const div = document.createElement('div');
     div.className = 'thumb-item' + (i === currentIdx ? ' active' : '');
     div.onclick = () => selectItem(i);
-
-    const img = document.createElement('img');
-    img.src = item.objectUrl;
-
-    const badge = document.createElement('span');
-    badge.className = 'thumb-badge';
-    badge.textContent = BADGE[item.status] || '';
-
-    const del = document.createElement('button');
-    del.className = 'thumb-del';
-    del.title = '删除';
-    del.textContent = '×';
+    const img = document.createElement('img'); img.src = it.url;
+    const badge = document.createElement('span'); badge.className = 'thumb-badge'; badge.innerHTML = BADGE[it.status] || '';
+    const del = document.createElement('button'); del.className = 'thumb-del'; del.innerHTML = '&times;';
     del.onclick = e => { e.stopPropagation(); deleteItem(i); };
-
-    div.appendChild(img);
-    div.appendChild(badge);
-    div.appendChild(del);
-    strip.insertBefore(div, addBtn);
+    div.append(img, badge, del);
+    strip.insertBefore(div, add);
   });
 }
 
 function selectItem(idx) {
   currentIdx = idx;
   renderThumbs();
-  const item = items[idx];
+  const it = items[idx];
 
-  // 左：原图
   const origBox = document.getElementById('origBox');
   origBox.innerHTML = '';
-  const origImg = document.createElement('img');
-  origImg.src = item.objectUrl;
-  origBox.appendChild(origImg);
+  const oi = document.createElement('img'); oi.src = it.url; origBox.appendChild(oi);
 
-  // 右：结果
   const resultBox = document.getElementById('resultBox');
   resultBox.innerHTML = '';
-  if (item.status === 'done' && item.data) {
+  if (it.status === 'done' && it.data) {
     const canvas = document.createElement('canvas');
     resultBox.appendChild(canvas);
     const src = new Image();
-    src.onload = () => {
-      canvas.width = src.width; canvas.height = src.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(src, 0, 0);
-      drawOverlay(ctx, item.data);
-    };
-    src.src = item.objectUrl;
-    showReading(item.data);
-  } else if (item.status === 'processing') {
-    resultBox.innerHTML = '<div class="img-placeholder">检测中...</div>';
+    src.onload = () => { canvas.width = src.width; canvas.height = src.height; const ctx = canvas.getContext('2d'); ctx.drawImage(src, 0, 0); drawOverlay(ctx, it.data); };
+    src.src = it.url;
+    showReading(it.data);
+  } else if (it.status === 'processing') {
+    resultBox.innerHTML = '<div class="img-placeholder">&#26816;&#27979;&#20013;...</div>';
     document.getElementById('readingNum').textContent = '—';
-    document.getElementById('readingMeta').innerHTML = '<span style="color:#555">检测中...</span>';
+    document.getElementById('readingMeta').innerHTML = '<span style="color:#555">&#26816;&#27979;&#20013;...</span>';
     document.getElementById('kpBody').innerHTML = '';
-  } else if (item.status === 'error') {
-    resultBox.innerHTML = '<div class="img-placeholder" style="color:#ff5f5f">检测失败，请检查后端连接</div>';
+  } else if (it.status === 'error') {
+    resultBox.innerHTML = '<div class="img-placeholder" style="color:#ff5f5f">&#26816;&#27979;&#22833;&#36133;</div>';
     document.getElementById('readingNum').textContent = '—';
-    document.getElementById('readingMeta').innerHTML = '<span class="badge badge-err">检测失败</span>';
+    document.getElementById('readingMeta').innerHTML = '<span class="badge badge-err">&#26816;&#27979;&#22833;&#36133;&#65292;&#35831;&#26816;&#26597;&#21518;&#31471;&#36830;&#25509;</span>';
     document.getElementById('kpBody').innerHTML = '';
   } else {
-    resultBox.innerHTML = '<div class="img-placeholder">等待检测...</div>';
+    resultBox.innerHTML = '<div class="img-placeholder">&#31561;&#24453;&#26816;&#27979;...</div>';
   }
 }
 
 async function detectItem(idx) {
   items[idx].status = 'processing';
   if (currentIdx === idx) selectItem(idx); else renderThumbs();
-
   const form = new FormData();
   form.append('file', items[idx].file);
   try {
-    const resp = await fetch(getAPI() + '/detect', { method: 'POST', body: form });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    items[idx].data   = await resp.json();
+    const r = await fetch(getAPI() + '/detect', { method: 'POST', body: form });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    items[idx].data = await r.json();
     items[idx].status = 'done';
   } catch(e) {
-    console.error('检测失败:', items[idx].file.name, e);
+    console.error('detect failed:', items[idx].file.name, e);
     items[idx].status = 'error';
-    items[idx].data   = null;
   }
   renderThumbs();
   if (currentIdx === idx) selectItem(idx);
@@ -327,24 +290,20 @@ function showReading(data) {
     document.getElementById('readingNum').textContent = r.value.toFixed(2);
     const oor = r.out_of_range;
     document.getElementById('readingMeta').innerHTML =
-      '<span class="badge ' + (oor ? 'badge-oor' : 'badge-ok') + '">' +
-      (oor ? '&#9888; 超量程' : '&#10003; 正常范围') + '</span><br>' +
-      '指针角度：' + r.pointer_angle_deg + '&deg;<br>' +
-      '置信度：' + (r.confidence * 100).toFixed(1) + '%<br>' +
-      '旋转轴：(' + r.pivot[0] + ', ' + r.pivot[1] + ')';
+      '<span class="badge ' + (oor ? 'badge-oor' : 'badge-ok') + '">' + (oor ? '&#9888; &#36229;&#37327;&#31243;' : '&#10003; &#27491;&#24120;&#33539;&#22260;') + '</span><br>' +
+      '&#25351;&#38024;&#35282;&#24230;&#65306;' + r.pointer_angle_deg + '&deg;<br>' +
+      '&#32622;&#20449;&#24230;&#65306;' + (r.confidence * 100).toFixed(1) + '%<br>' +
+      '&#26059;&#36716;&#36724;&#65306;(' + r.pivot[0] + ', ' + r.pivot[1] + ')';
   } else {
     document.getElementById('readingNum').textContent = '—';
-    document.getElementById('readingMeta').innerHTML =
-      '<span class="badge badge-err">' + (r ? r.error : '未检测到仪表') + '</span>';
+    document.getElementById('readingMeta').innerHTML = '<span class="badge badge-err">' + (r ? r.error : '&#26410;&#26816;&#27979;&#21040;&#20272;&#34920;') + '</span>';
   }
   const tbody = document.getElementById('kpBody');
   tbody.innerHTML = '';
   if (data && data.people && data.people[0]) {
     data.people[0].keypoints.forEach(kp => {
       const tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + kp.kp_id + '</td><td>' + kp.x.toFixed(1) +
-                     '</td><td>' + kp.y.toFixed(1) + '</td><td>' +
-                     (kp.conf * 100).toFixed(0) + '%</td>';
+      tr.innerHTML = '<td>' + kp.kp_id + '</td><td>' + kp.x.toFixed(1) + '</td><td>' + kp.y.toFixed(1) + '</td><td>' + (kp.conf*100).toFixed(0) + '%</td>';
       tbody.appendChild(tr);
     });
   }
@@ -354,80 +313,47 @@ function drawOverlay(ctx, data) {
   if (!data || !data.people || !data.people.length) return;
   const kps = {};
   data.people[0].keypoints.forEach(k => { if (k.conf >= 0.5) kps[k.kp_id] = k; });
-
   [[0,1],[1,2]].forEach(([a,b]) => {
-    if (kps[a] && kps[b]) {
-      ctx.beginPath(); ctx.moveTo(kps[a].x,kps[a].y); ctx.lineTo(kps[b].x,kps[b].y);
-      ctx.strokeStyle = 'rgba(255,165,0,.9)'; ctx.lineWidth = 2.5; ctx.stroke();
-    }
+    if (kps[a] && kps[b]) { ctx.beginPath(); ctx.moveTo(kps[a].x,kps[a].y); ctx.lineTo(kps[b].x,kps[b].y); ctx.strokeStyle='rgba(255,165,0,.9)'; ctx.lineWidth=2.5; ctx.stroke(); }
   });
-
   Object.values(kps).forEach(kp => {
-    ctx.beginPath(); ctx.arc(kp.x, kp.y, 5, 0, 2*Math.PI);
-    ctx.fillStyle = '#ff3333'; ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Arial';
-    ctx.fillText(kp.kp_id, kp.x + 7, kp.y - 4);
+    ctx.beginPath(); ctx.arc(kp.x,kp.y,5,0,2*Math.PI); ctx.fillStyle='#ff3333'; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 11px Arial'; ctx.fillText(kp.kp_id,kp.x+7,kp.y-4);
   });
-
   const r = data.reading;
   if (!r || r.error) return;
-
-  const [px, py] = r.pivot;
-  const spts     = r.scale_points;
-  const meanR    = spts.reduce((s,[sx,sy]) => s + Math.hypot(sx-px,sy-py), 0) / spts.length;
-
+  const [px,py] = r.pivot, spts = r.scale_points;
+  const meanR = spts.reduce((s,[sx,sy])=>s+Math.hypot(sx-px,sy-py),0)/spts.length;
   spts.forEach(([sx,sy]) => {
-    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(sx,sy);
-    ctx.strokeStyle = 'rgba(0,220,100,.5)'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.beginPath(); ctx.arc(sx,sy,4,0,2*Math.PI);
-    ctx.fillStyle = 'rgba(0,220,100,.9)'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(sx,sy); ctx.strokeStyle='rgba(0,220,100,.5)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx,sy,4,0,2*Math.PI); ctx.fillStyle='rgba(0,220,100,.9)'; ctx.fill();
   });
-
-  ctx.beginPath(); ctx.arc(px,py,10,0,2*Math.PI);
-  ctx.strokeStyle = '#0f0'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(px-14,py); ctx.lineTo(px+14,py);
-  ctx.moveTo(px,py-14); ctx.lineTo(px,py+14);
-  ctx.strokeStyle = '#0f0'; ctx.lineWidth = 2; ctx.stroke();
-
-  const rad   = r.pointer_angle_deg * Math.PI / 180;
-  const tx    = px + meanR * Math.cos(rad);
-  const ty    = py + meanR * Math.sin(rad);
-  const color = r.out_of_range ? '#ff3333' : '#ff8800';
-  _arrow(ctx, px, py, tx, ty, color);
-
-  const label = r.value.toFixed(2) + (r.out_of_range ? ' [超程]' : '');
-  ctx.font = 'bold 18px Arial';
-  const tw = ctx.measureText(label).width;
-  const lx = Math.max(tx - tw/2, 4);
-  const ly = ty > 40 ? ty - 18 : ty + 30;
-  ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(lx-4,ly-18,tw+8,26);
-  ctx.fillStyle = '#fff'; ctx.fillText(label, lx, ly);
+  ctx.beginPath(); ctx.arc(px,py,10,0,2*Math.PI); ctx.strokeStyle='#0f0'; ctx.lineWidth=2; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px-14,py); ctx.lineTo(px+14,py); ctx.moveTo(px,py-14); ctx.lineTo(px,py+14); ctx.strokeStyle='#0f0'; ctx.lineWidth=2; ctx.stroke();
+  const rad=r.pointer_angle_deg*Math.PI/180, tx=px+meanR*Math.cos(rad), ty=py+meanR*Math.sin(rad);
+  const col=r.out_of_range?'#ff3333':'#ff8800';
+  const ang=Math.atan2(ty-py,tx-px), hs=14;
+  ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(tx,ty); ctx.strokeStyle=col; ctx.lineWidth=3; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(tx-hs*Math.cos(ang-.4),ty-hs*Math.sin(ang-.4)); ctx.lineTo(tx-hs*Math.cos(ang+.4),ty-hs*Math.sin(ang+.4)); ctx.closePath(); ctx.fillStyle=col; ctx.fill();
+  const label=r.value.toFixed(2)+(r.out_of_range?' [OOR]':'');
+  ctx.font='bold 18px Arial'; const tw=ctx.measureText(label).width;
+  const lx=Math.max(tx-tw/2,4), ly=ty>40?ty-18:ty+30;
+  ctx.fillStyle='rgba(0,0,0,.75)'; ctx.fillRect(lx-4,ly-18,tw+8,26);
+  ctx.fillStyle='#fff'; ctx.fillText(label,lx,ly);
 }
 
-function _arrow(ctx, x1, y1, x2, y2, color) {
-  const ang = Math.atan2(y2-y1, x2-x1), hs = 14;
-  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
-  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x2,y2);
-  ctx.lineTo(x2-hs*Math.cos(ang-.4), y2-hs*Math.sin(ang-.4));
-  ctx.lineTo(x2-hs*Math.cos(ang+.4), y2-hs*Math.sin(ang+.4));
-  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
-}
-
-// ---- 视频流 ----
+// ---- stream ----
 function startStream() {
   const src = document.getElementById('streamSrc').value.trim() || '0';
   const img = document.getElementById('streamImg');
-  // 加时间戳防止浏览器缓存旧流
+  img.onerror = null;
   img.src = getAPI() + '/video_feed?source=' + encodeURIComponent(src) + '&_t=' + Date.now();
   document.getElementById('startBtn').disabled = true;
   document.getElementById('stopBtn').disabled  = false;
   const chip = document.getElementById('streamStatus');
-  chip.textContent = '推流中'; chip.className = 'status-chip ok';
+  chip.textContent = '&#25512;&#27969;&#20013;'; chip.className = 'status-chip ok';
   img.onerror = () => {
-    chip.textContent = '连接失败'; chip.className = 'status-chip err';
+    chip.innerHTML = '&#36830;&#25509;&#22833;&#36133;'; chip.className = 'status-chip err';
     document.getElementById('startBtn').disabled = false;
     document.getElementById('stopBtn').disabled  = true;
   };
@@ -435,12 +361,11 @@ function startStream() {
 
 async function stopStream() {
   const img = document.getElementById('streamImg');
-  img.onerror = null;
-  img.src = '';
+  img.onerror = null; img.src = '';
   document.getElementById('startBtn').disabled = false;
   document.getElementById('stopBtn').disabled  = true;
   const chip = document.getElementById('streamStatus');
-  chip.textContent = '已停止'; chip.className = 'status-chip idle';
+  chip.innerHTML = '&#24050;&#20572;&#27490;'; chip.className = 'status-chip idle';
   try { await fetch(getAPI() + '/video_stop'); } catch(e) {}
 }
 </script>
