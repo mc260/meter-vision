@@ -78,7 +78,7 @@ header span{font-size:.82rem;color:#666}
     <circle cx="14" cy="14" r="2.5" fill="#7eb6ff"/>
   </svg>
   <h1>meter-vision</h1>
-  <span>&#25351;&#38024;&#20272;&#34920;&#33258;&#21160;&#35835;&#25968;&#31995;&#32479;</span>
+  <span>指针仪表自动读数系统</span>
 </header>
 
 <div class="container">
@@ -101,13 +101,13 @@ header span{font-size:.82rem;color:#666}
           <rect width="44" height="44" rx="10" fill="#1e2235"/>
           <path d="M22 13v18M13 22l9-9 9 9" stroke="#7eb6ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <p>&#25320;&#25168;&#25110;&#28857;&#20987;&#36873;&#25321;&#22270;&#29255;&#65288;&#25903;&#25345;&#22810;&#36873;&#65289;</p>
+        <p>拖入或点击选择图片（支持多选）</p>
       </div>
     </div>
 
     <div id="workArea" style="display:none">
       <div class="card">
-        <div class="card-title">&#24050;&#19978;&#20256;&#22270;&#29255; &mdash; &#24481;&#21010;&#32553;&#30053;&#22270;&#21487;&#21024;&#38500;</div>
+        <div class="card-title">已上传图片 — 点击缩略图右上角可删除</div>
         <div class="thumb-strip" id="thumbStrip">
           <div class="thumb-add" title="&#32487;&#32493;&#28155;&#21152;">
             <input type="file" id="addMoreInput" accept="image/*" multiple>&#43;
@@ -131,7 +131,7 @@ header span{font-size:.82rem;color:#666}
         <div class="reading-row">
           <div class="reading-big">
             <div class="reading-num" id="readingNum">&#8212;</div>
-            <div class="reading-unit">&#21010;&#24230;&#20540;</div>
+            <div class="reading-unit">刻度值</div>
           </div>
           <div>
             <div class="reading-meta" id="readingMeta" style="color:#444">&#31561;&#24453;&#26816;&#27979;...</div>
@@ -160,7 +160,7 @@ header span{font-size:.82rem;color:#666}
       </div>
       <img id="streamImg" alt="&#35270;&#39057;&#27969;&#23558;&#22312;&#27492;&#22788;&#26174;&#31034;">
       <p style="margin-top:8px;font-size:.78rem;color:#444">
-        &#25444;&#20687;&#22836;&#32534;&#21495;&#36890;&#24120;&#20026; 0&#65288;&#20869;&#32622;&#65289;&#25110; 1&#65288;&#22806;&#25509;USB&#65289;&#12290;
+        摄像头编号通常为 0（内置）或 1（外接USB）
       </p>
     </div>
   </div>
