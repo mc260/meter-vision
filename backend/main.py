@@ -7,10 +7,11 @@ FastAPI server exposing:
   GET  /                — health check
 """
 
-import io
+import sys
 import time
 import threading
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 import cv2
@@ -18,16 +19,20 @@ import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from ultralytics import YOLO
 
+# Fix import path so gauge_reader can be found regardless of working directory
+sys.path.insert(0, str(Path(__file__).parent))
 from gauge_reader import compute_gauge_reading
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 
-MODEL_PATH = "../models/best.pt"
+# Resolve model path relative to this file, not the working directory
+MODEL_PATH = str(Path(__file__).parent.parent / "models" / "best.pt")
 CONF_THRESHOLD = 0.25
 IMGSZ = 640
 STREAM_FPS = 10          # max frames per second for MJPEG stream
@@ -47,7 +52,6 @@ async def lifespan(app: FastAPI):
     model = YOLO(MODEL_PATH)
     print(f"[meter-vision] model loaded: {MODEL_PATH}")
     yield
-    # cleanup on shutdown
     stop_stream()
 
 
@@ -64,6 +68,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve frontend static files at root
+_frontend_dir = Path(__file__).parent.parent / "frontend"
+if _frontend_dir.exists():
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/ui", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
 
 
 # ---------------------------------------------------------------------------
@@ -181,50 +191,61 @@ _stream_active = False
 _cap: Optional[cv2.VideoCapture] = None
 
 
+def _stop_stream_nolock():
+    """Stop stream without acquiring the lock (call only while holding it)."""
+    global _stream_active, _cap
+    _stream_active = False
+    if _cap is not None:
+        _cap.release()
+        _cap = None
+
+
 def stop_stream():
     global _stream_active, _cap
     with _stream_lock:
-        _stream_active = False
-        if _cap is not None:
-            _cap.release()
-            _cap = None
+        _stop_stream_nolock()
 
 
 def mjpeg_generator(source: str):
     global _stream_active, _cap, _stream_source
-    with _stream_lock:
-        stop_stream()
-        _stream_source = source
-        _stream_active = True
-        _cap = cv2.VideoCapture(int(source) if source.isdigit() else source)
 
-    if not _cap.isOpened():
-        stop_stream()
-        return
+    # Set up new capture under lock, stopping any previous stream first
+    with _stream_lock:
+        _stop_stream_nolock()
+        _stream_source = source
+        cap = cv2.VideoCapture(int(source) if source.isdigit() else source)
+        if not cap.isOpened():
+            cap.release()
+            return
+        _cap = cap
+        _stream_active = True
 
     interval = 1.0 / STREAM_FPS
     try:
         while True:
+            # Check active flag and read frame WITHOUT holding the lock
+            # to prevent stop_stream() from deadlocking
             with _stream_lock:
-                if not _stream_active or _cap is None:
-                    break
-                ret, frame = _cap.read()
+                active = _stream_active
+                local_cap = _cap
+            if not active or local_cap is None:
+                break
 
+            ret, frame = local_cap.read()
             if not ret:
                 break
 
-            # Run inference
-            _, buf = cv2.imencode(".jpg", frame,
-                                  [cv2.IMWRITE_JPEG_QUALITY, STREAM_JPEG_QUALITY])
-            img_bytes = buf.tobytes()
+            # Run inference (outside lock — may take time)
             try:
-                api_data = run_inference(img_bytes)
+                _, buf = cv2.imencode(".jpg", frame,
+                                      [cv2.IMWRITE_JPEG_QUALITY, STREAM_JPEG_QUALITY])
+                api_data = run_inference(buf.tobytes())
                 frame, _ = annotate_frame(frame, api_data)
             except Exception:
                 pass  # keep streaming even if inference fails on one frame
 
             _, out_buf = cv2.imencode(".jpg", frame,
-                                     [cv2.IMWRITE_JPEG_QUALITY, STREAM_JPEG_QUALITY])
+                                      [cv2.IMWRITE_JPEG_QUALITY, STREAM_JPEG_QUALITY])
             yield (
                 b"--frame\r\n"
                 b"Content-Type: image/jpeg\r\n\r\n"
