@@ -4,10 +4,6 @@
   <a href="README.En.md">English</a> | <strong>中文</strong>
 </div>
 
-<div align="right">
-  <strong>中文</strong> | <a href="README.md">English</a>
-</div>
-
 **基于 YOLO 姿态估计的指针仪表自动读数系统。**
 
 从图片或实时视频流中自动识别模拟指针仪表（压力表、电压表、电流表等）的读数。
